@@ -1,459 +1,526 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kai — ADHD Coach</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      background: var(--tg-theme-bg-color, #f8f9fa);
-      color: var(--tg-theme-text-color, #1a1a2e);
-      min-height: 100vh;
-      padding-bottom: 80px;
-    }
-    .header {
-      background: linear-gradient(135deg, #6c63ff 0%, #b8a9ff 100%);
-      padding: 48px 24px 32px;
-      color: white;
-    }
-    .header h1 {
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-    .header .sub {
-      font-size: 14px;
-      opacity: 0.85;
-      margin-top: 4px;
-    }
-    .one-thing-card {
-      margin: -24px 16px 0;
-      background: var(--tg-theme-section-bg-color, #fff);
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 8px 24px rgba(108, 99, 255, 0.12);
-      position: relative;
-      z-index: 10;
-    }
-    .one-thing-label {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: #6c63ff;
-      margin-bottom: 8px;
-    }
-    .one-thing-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .one-thing-emoji {
-      font-size: 32px;
-      width: 48px; height: 48px;
-      background: #f0eeff;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .one-thing-text {
-      flex: 1;
-    }
-    .one-thing-title {
-      font-size: 17px;
-      font-weight: 700;
-    }
-    .one-thing-time {
-      font-size: 13px;
-      color: #999;
-      margin-top: 2px;
-    }
-    .btn-glow {
-      background: #6c63ff;
-      color: white;
-      border: none;
-      border-radius: 14px;
-      padding: 12px 24px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
-    }
-    .btn-glow:active { transform: scale(0.95); }
-    .btn-glow.done {
-      background: #00c48c;
-      box-shadow: 0 4px 12px rgba(0, 196, 140, 0.3);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Kai — ADHD Coach</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    background:var(--tg-theme-bg-color,#f5f6fa);
+    color:var(--tg-theme-text-color,#1a1a2e);
+    min-height:100vh;overflow-x:hidden;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;-webkit-user-select:none;
+  }
+  .header{
+    background:linear-gradient(135deg,#6c63ff 0%,#8b83ff 50%,#b8a9ff 100%);
+    padding:44px 20px 28px;color:#fff;position:relative;overflow:hidden;
+  }
+  .header::after{
+    content:'';position:absolute;top:-60px;right:-40px;
+    width:180px;height:180px;background:rgba(255,255,255,0.06);
+    border-radius:50%;
+  }
+  .header h1{font-size:26px;font-weight:700;letter-spacing:-0.4px;position:relative;z-index:1}
+  .header .sub{font-size:14px;opacity:.85;margin-top:2px;position:relative;z-index:1}
+  .streak-badge{
+    position:absolute;top:14px;right:20px;z-index:2;
+    background:rgba(255,255,255,.18);backdrop-filter:blur(6px);
+    border-radius:20px;padding:5px 14px;font-size:13px;font-weight:600;
+    display:flex;align-items:center;gap:6px;
+  }
 
-    .section-label {
-      padding: 24px 20px 8px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #6c63ff;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-    }
+  /* ONE THING */
+  .one-thing{
+    margin:-20px 14px 0;background:var(--tg-theme-section-bg-color,#fff);
+    border-radius:18px;padding:18px;position:relative;z-index:10;
+    box-shadow:0 6px 24px rgba(108,99,255,.14);
+  }
+  .one-thing-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:#6c63ff;margin-bottom:10px}
+  .one-thing-row{display:flex;align-items:center;gap:12px}
+  .one-thing-emoji{font-size:28px;width:46px;height:46px;background:#f0eeff;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .one-thing-text{flex:1;min-width:0}
+  .one-thing-title{font-size:16px;font-weight:700}
+  .one-thing-title.done{text-decoration:line-through;color:#aaa}
+  .one-thing-time{font-size:12px;color:#999;margin-top:2px}
+  .btn-done{
+    background:#6c63ff;color:#fff;border:none;border-radius:12px;
+    padding:12px 20px;font-size:14px;font-weight:600;cursor:pointer;
+    font-family:inherit;white-space:nowrap;
+    box-shadow:0 4px 12px rgba(108,99,255,.3);
+    transition:all .2s;flex-shrink:0;
+  }
+  .btn-done:active{transform:scale(.94)}
+  .btn-done.completed{background:#00c48c;box-shadow:0 4px 12px rgba(0,196,140,.3)}
 
-    .action-list {
-      margin: 0 16px;
-    }
-    .action-item {
-      background: var(--tg-theme-section-bg-color, #fff);
-      border-radius: 14px;
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 8px;
-      cursor: pointer;
-      transition: all 0.15s;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .action-item:active { transform: scale(0.97); }
-    .action-icon { font-size: 24px; width: 32px; text-align: center; }
-    .action-text { flex: 1; font-size: 15px; font-weight: 500; }
-    .action-arrow { color: #ccc; font-size: 18px; }
+  /* COACH BUBBLE */
+  .coach{
+    margin:12px 14px;background:#f0eeff;border-radius:16px 16px 16px 4px;
+    padding:14px;display:flex;gap:10px;align-items:flex-start;
+    transition:all .3s;
+  }
+  .coach-avatar{
+    width:34px;height:34px;background:#6c63ff;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:15px;flex-shrink:0;
+  }
+  .coach-msg{font-size:14px;line-height:1.5;color:#2d2d44;flex:1}
+  .coach-msg strong{color:#6c63ff}
 
-    .coach-bubble {
-      margin: 12px 16px;
-      background: #f0eeff;
-      border-radius: 18px 18px 18px 4px;
-      padding: 16px;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-    .coach-avatar {
-      width: 36px; height: 36px;
-      background: #6c63ff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-    .coach-msg {
-      font-size: 14px;
-      line-height: 1.5;
-      color: #2d2d44;
-    }
-    .coach-msg strong { color: #6c63ff; }
+  /* SECTION */
+  .sec{
+    padding:20px 16px 6px;font-size:12px;font-weight:600;
+    color:#6c63ff;text-transform:uppercase;letter-spacing:1px;
+  }
 
-    .bottom-tab {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: 70px;
-      background: var(--tg-theme-section-bg-color, #fff);
-      border-top: 1px solid #eee;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding-bottom: 8px;
-    }
-    .tab-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      font-size: 10px;
-      color: #bbb;
-      cursor: pointer;
-      padding: 4px 12px;
-    }
-    .tab-item.active { color: #6c63ff; }
-    .tab-icon { font-size: 22px; }
+  /* TASKS */
+  .task{
+    background:var(--tg-theme-section-bg-color,#fff);
+    border-radius:13px;padding:13px 14px;display:flex;align-items:center;
+    gap:10px;margin:0 14px 5px;cursor:pointer;
+    box-shadow:0 1px 6px rgba(0,0,0,.04);transition:all .15s;
+  }
+  .task:active{transform:scale(.97)}
+  .task-check{
+    width:22px;height:22px;border:2px solid #d0d0e0;border-radius:50%;
+    flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    transition:all .2s;
+  }
+  .task-check.done{background:#6c63ff;border-color:#6c63ff}
+  .task-check.done::after{content:'✓';color:#fff;font-size:12px;font-weight:700}
+  .task-text{flex:1;font-size:14px;font-weight:500}
+  .task-text.done{text-decoration:line-through;color:#bbb}
+  .task-time{font-size:11px;color:#bbb;font-weight:500}
 
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      z-index: 200;
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-    }
-    .modal-overlay.show { display: flex; }
-    .modal-sheet {
-      background: var(--tg-theme-section-bg-color, #fff);
-      border-radius: 24px 24px 0 0;
-      width: 100%;
-      max-width: 393px;
-      padding: 24px 20px 40px;
-      animation: slideUp 0.3s ease;
-    }
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-    .modal-handle {
-      width: 36px; height: 4px;
-      background: #ddd;
-      border-radius: 2px;
-      margin: 0 auto 16px;
-    }
-    .modal-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
-    .modal-input {
-      width: 100%;
-      border: 2px solid #e8e8f0;
-      border-radius: 14px;
-      padding: 14px 16px;
-      font-size: 16px;
-      font-family: inherit;
-      outline: none;
-      margin-bottom: 12px;
-    }
-    .modal-input:focus { border-color: #6c63ff; }
-    .modal-btn {
-      width: 100%;
-      background: #6c63ff;
-      color: white;
-      border: none;
-      border-radius: 14px;
-      padding: 14px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-    }
+  /* ACTIONS */
+  .actions{margin:0 14px}
+  .act{
+    background:var(--tg-theme-section-bg-color,#fff);
+    border-radius:13px;padding:14px 15px;display:flex;align-items:center;
+    gap:11px;margin-bottom:6px;cursor:pointer;transition:all .15s;
+    box-shadow:0 1px 6px rgba(0,0,0,.04);
+  }
+  .act:active{transform:scale(.97)}
+  .act-icon{font-size:22px;width:30px;text-align:center}
+  .act-text{flex:1;font-size:15px;font-weight:500}
+  .act-arrow{color:#ccc;font-size:16px}
 
-    .task-item {
-      background: var(--tg-theme-section-bg-color, #fff);
-      border-radius: 12px;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 0 16px 6px;
-      cursor: pointer;
-    }
-    .task-check {
-      width: 22px; height: 22px;
-      border: 2px solid #d0d0e0;
-      border-radius: 50%;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-    .task-check.done { background: #6c63ff; border-color: #6c63ff; }
-    .task-check.done::after { content: '✓'; color: white; font-size: 13px; font-weight: 700; }
-    .task-text { flex: 1; font-size: 15px; }
-    .task-text.done { text-decoration: line-through; color: #bbb; }
-    .task-time { font-size: 11px; color: #bbb; font-weight: 500; }
-  </style>
+  /* BOTTOM NAV */
+  .bottom{
+    position:fixed;bottom:0;left:0;right:0;height:66px;
+    background:var(--tg-theme-section-bg-color,#fff);
+    border-top:1px solid #eee;display:flex;justify-content:space-around;
+    align-items:center;padding-bottom:6px;z-index:50;
+  }
+  .tab{
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    font-size:10px;color:#bbb;cursor:pointer;padding:6px 14px;
+    transition:all .15s;
+  }
+  .tab.sel{color:#6c63ff}
+  .tab-icon{font-size:22px}
+
+  /* MODAL */
+  .m-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;
+    display:none;align-items:flex-end;justify-content:center;
+  }
+  .m-overlay.on{display:flex}
+  .m-sheet{
+    background:var(--tg-theme-section-bg-color,#fff);
+    border-radius:22px 22px 0 0;width:100%;max-width:420px;
+    padding:22px 20px 36px;animation:up .28s ease;
+  }
+  @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .m-bar{width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 14px}
+  .m-title{font-size:17px;font-weight:700;margin-bottom:10px}
+  .m-input{
+    width:100%;border:2px solid #e8e8f0;border-radius:13px;
+    padding:13px 15px;font-size:16px;font-family:inherit;outline:none;
+    margin-bottom:10px;-webkit-appearance:none;
+  }
+  .m-input:focus{border-color:#6c63ff}
+  .m-btn{
+    width:100%;background:#6c63ff;color:#fff;border:none;border-radius:13px;
+    padding:13px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;
+  }
+  .m-btn:active{background:#5b52e0}
+
+  /* TOAST */
+  .toast{
+    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-120px);
+    background:#00c48c;color:#fff;border-radius:14px;padding:12px 22px;
+    font-weight:600;font-size:14px;z-index:300;pointer-events:none;
+    transition:transform .35s cubic-bezier(.68,-.55,.265,1.55);
+    box-shadow:0 6px 20px rgba(0,196,140,.35);
+  }
+  .toast.s{transform:translateX(-50%) translateY(0)}
+
+  /* CONFETTI */
+  .confetti-piece{
+    position:fixed;z-index:250;pointer-events:none;
+    font-size:22px;animation:fall .8s ease-out forwards;
+  }
+  @keyframes fall{
+    0%{transform:translateY(0) rotate(0deg);opacity:1}
+    100%{transform:translateY(100vh) rotate(720deg);opacity:0}
+  }
+
+  .edit-btn{
+    position:absolute;top:10px;left:10px;z-index:12;
+    background:rgba(255,255,255,.2);border:none;border-radius:10px;
+    width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+    font-size:16px;cursor:pointer;color:#fff;
+  }
+
+  .empty-state{
+    text-align:center;padding:30px 20px;color:#bbb;font-size:14px;
+  }
+  .xp-badge{
+    background:#f0eeff;color:#6c63ff;border-radius:10px;
+    padding:2px 8px;font-size:11px;font-weight:600;
+  }
+</style>
 </head>
 <body>
-  <div class="header">
-    <h1>Привет, Костя ☀️</h1>
-    <div class="sub">Твой ADHD-коуч. Одно дело за раз.</div>
-  </div>
 
-  <!-- ONE THING CARD -->
-  <div class="one-thing-card">
-    <div class="one-thing-label">🎯 Одно дело на сегодня</div>
-    <div class="one-thing-row">
-      <div class="one-thing-emoji">🍠</div>
-      <div class="one-thing-text">
-        <div class="one-thing-title" id="oneTitle">Нарезать батат</div>
-        <div class="one-thing-time"><span id="oneProject">Дегидратор</span> · ~5 мин</div>
-      </div>
-      <button class="btn-glow" id="oneBtn" onclick="completeOne()">🔥 Сделать</button>
-    </div>
-  </div>
+<div class="header">
+  <div class="streak-badge" id="streakBadge">🔥 <span id="streakNum">0</span></div>
+  <button class="edit-btn" onclick="editOneThing()" title="Изменить дело">✏️</button>
+  <h1>Привет, Костя ☀️</h1>
+  <div class="sub">Твой ADHD-коуч. Одно дело за раз.</div>
+</div>
 
-  <!-- COACH BUBBLE -->
-  <div class="coach-bubble" id="coachBubble">
-    <div class="coach-avatar">🧘</div>
-    <div class="coach-msg" id="coachMsg">
-      <strong>Kai:</strong> "Твоё одно дело — нарезать батат для дегидратора."<br>
-      Это займёт ~5 минут. Это <em>единственное</em>, что нужно сделать.<br>
-      <span style="font-size:12px;opacity:0.6;display:block;margin-top:4px;">👆 Нажми «Сделать», когда готово</span>
+<!-- ONE THING -->
+<div class="one-thing" id="oneThingCard">
+  <div class="one-thing-label">🎯 Одно дело на сегодня</div>
+  <div class="one-thing-row">
+    <div class="one-thing-emoji" id="oneEmoji">🍠</div>
+    <div class="one-thing-text">
+      <div class="one-thing-title" id="oneTitle">Без дела</div>
+      <div class="one-thing-time" id="oneMeta"></div>
     </div>
+    <button class="btn-done" id="oneBtn" onclick="doneOne()">🔥 Сделать</button>
   </div>
+</div>
 
-  <!-- TODAY'S TASKS -->
-  <div class="section-label">📋 Сегодня</div>
+<!-- COACH -->
+<div class="coach" id="coachBubble">
+  <div class="coach-avatar">🧘</div>
+  <div class="coach-msg" id="coachMsg">
+    <strong>Kai:</strong> "Привет! 👋<br>Напиши одно дело на сегодня. Только одно."
+  </div>
+</div>
 
-  <div class="task-item" onclick="toggleTask(this)">
-    <div class="task-check"></div>
-    <span class="task-text">Нарезать батат 🍠</span>
-    <span class="task-time">~5 мин</span>
-  </div>
-  <div class="task-item" onclick="toggleTask(this)">
-    <div class="task-check"></div>
-    <span class="task-text">Дверь в козлятнике 🐐</span>
-    <span class="task-time">~2ч</span>
-  </div>
-  <div class="task-item" onclick="toggleTask(this)">
-    <div class="task-check"></div>
-    <span class="task-text">Полить грядки 🌱</span>
-    <span class="task-time">~10 мин</span>
-  </div>
+<!-- TASKS -->
+<div class="sec">📋 Сегодня</div>
+<div id="taskList">
+  <div class="empty-state">Нажми + чтобы добавить задачу</div>
+</div>
 
-  <!-- QUICK ACTIONS -->
-  <div class="section-label">⚡ Быстрые действия</div>
-  <div class="action-list">
-    <div class="action-item" onclick="openModal('bodyDouble')">
-      <div class="action-icon">🧑‍🤝‍🧑</div>
-      <div class="action-text">Body Double (25 мин)</div>
-      <div class="action-arrow">→</div>
-    </div>
-    <div class="action-item" onclick="openModal('stuck')">
-      <div class="action-icon">🆘</div>
-      <div class="action-text">Я застрял / overwhelmed</div>
-      <div class="action-arrow">→</div>
-    </div>
-    <div class="action-item" onclick="openModal('park')">
-      <div class="action-icon">🅿️</div>
-      <div class="action-text">Parking Lot (сохранить идею)</div>
-      <div class="action-arrow">→</div>
-    </div>
+<!-- ACTIONS -->
+<div class="sec">⚡ Быстрые действия</div>
+<div class="actions">
+  <div class="act" ontouchend="openModal('bodyDouble')" onclick="openModal('bodyDouble')">
+    <div class="act-icon">🧑‍🤝‍🧑</div>
+    <div class="act-text">Body Double (25 мин)</div>
+    <div class="act-arrow">→</div>
   </div>
+  <div class="act" ontouchend="openModal('stuck')" onclick="openModal('stuck')">
+    <div class="act-icon">🆘</div>
+    <div class="act-text">Я застрял / overwhelmed</div>
+    <div class="act-arrow">→</div>
+  </div>
+  <div class="act" ontouchend="openModal('park')" onclick="openModal('park')">
+    <div class="act-icon">🅿️</div>
+    <div class="act-text">Parking Lot</div>
+    <div class="act-arrow">→</div>
+  </div>
+</div>
 
-  <!-- BOTTOM TABS -->
-  <div class="bottom-tab">
-    <div class="tab-item active">
-      <span class="tab-icon">🎯</span>
-      <span>Сегодня</span>
-    </div>
-    <div class="tab-item" onclick="switchTab('week')">
-      <span class="tab-icon">📅</span>
-      <span>Неделя</span>
-    </div>
-    <div class="tab-item" onclick="switchTab('wins')">
-      <span class="tab-icon">🏆</span>
-      <span>Победы</span>
-    </div>
-    <div class="tab-item" onclick="switchTab('chat')">
-      <span class="tab-icon">💬</span>
-      <span>Чат с Kai</span>
-    </div>
+<!-- BOTTOM -->
+<div class="bottom">
+  <div class="tab sel" id="tabToday" onclick="selTab('today')">
+    <span class="tab-icon">🎯</span><span>Сегодня</span>
   </div>
+  <div class="tab" id="tabWeek" onclick="selTab('week')">
+    <span class="tab-icon">📅</span><span>Неделя</span>
+  </div>
+  <div class="tab" id="tabWins" onclick="selTab('wins')">
+    <span class="tab-icon">🏆</span><span>Победы</span>
+  </div>
+  <div class="tab" id="tabAdd" onclick="openModal('add')">
+    <span class="tab-icon">➕</span><span>Добавить</span>
+  </div>
+</div>
 
-  <!-- BOTTOM SHEET MODAL -->
-  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-      <div class="modal-handle"></div>
-      <div class="modal-title" id="modalTitle">Создать задачу</div>
-      <input class="modal-input" id="modalInput" placeholder="Напиши..." autofocus>
-      <button class="modal-btn" id="modalBtn" onclick="submitModal()">Готово</button>
-    </div>
+<!-- MODAL -->
+<div class="m-overlay" id="modal">
+  <div class="m-sheet" onclick="event.stopPropagation()" ontouchend="event.stopPropagation()">
+    <div class="m-bar"></div>
+    <div class="m-title" id="mTitle">Новая задача</div>
+    <input class="m-input" id="mInput" placeholder="Что хочешь сделать?" autocomplete="off">
+    <button class="m-btn" id="mBtn" onclick="submitModal()">Добавить +</button>
   </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
+// ========== Init Telegram ==========
+if (window.Telegram && Telegram.WebApp) {
+  Telegram.WebApp.ready();
+  Telegram.WebApp.expand();
+}
+
+// ========== STATE ENGINE ==========
+const LS = {
+  get(k, def) {
+    try { const v = localStorage.getItem('kai_'+k); return v ? JSON.parse(v) : def }
+    catch { return def }
+  },
+  set(k, v) { try { localStorage.setItem('kai_'+k, JSON.stringify(v)) } catch {} }
+};
+
+// Daily key check — reset on new day
+const today = new Date().toISOString().split('T')[0];
+let state = LS.get('state', {
+  date: today,
+  oneThing: { title: '', emoji: '🎯', project: '', time: '~5 мин', done: false },
+  tasks: [],
+  streak: 0,
+  totalDone: 0,
+  xp: 0,
+  lastDoneDate: null
+});
+
+// Reset daily if new day
+if (state.date !== today) {
+  const wasDoneYesterday = state.lastDoneDate === state.date;
+  state.date = today;
+  state.oneThing = { title: '', emoji: '🎯', project: '', time: '~5 мин', done: false };
+  state.tasks = state.tasks.filter(t => !t.done); // keep undone tasks
+  if (!wasDoneYesterday && state.streak > 0) state.streak = 0; // reset streak if missed yesterday
+  LS.set('state', state);
+}
+
+function save() { LS.set('state', state) }
+
+// ========== RENDER ==========
+function render() {
+  // Streak
+  document.getElementById('streakNum').textContent = state.streak;
+  document.getElementById('streakBadge').style.display = state.streak > 0 ? 'flex' : 'none';
+
+  // One thing
+  const ot = state.oneThing;
+  document.getElementById('oneEmoji').textContent = ot.emoji;
+  document.getElementById('oneTitle').textContent = ot.title || 'Без дела';
+  document.getElementById('oneTitle').classList.toggle('done', ot.done);
+  document.getElementById('oneMeta').textContent = ot.project ? `${ot.project} · ${ot.time}` : '';
+  const btn = document.getElementById('oneBtn');
+  if (ot.done) {
+    btn.textContent = '✅ Готово!';
+    btn.className = 'btn-done completed';
+  } else if (ot.title) {
+    btn.textContent = '🔥 Сделать';
+    btn.className = 'btn-done';
+  } else {
+    btn.textContent = '+ Задать';
+    btn.className = 'btn-done';
+  }
+  document.getElementById('oneThingCard').style.display = '';
+
+  // Tasks
+  const list = document.getElementById('taskList');
+  if (state.tasks.length === 0) {
+    list.innerHTML = '<div class="empty-state">Нажми + чтобы добавить задачу</div>';
+  } else {
+    list.innerHTML = state.tasks.map((t,i) => `
+      <div class="task" ontouchend="toggleTask(${i})" onclick="toggleTask(${i})">
+        <div class="task-check${t.done?' done':''}"></div>
+        <span class="task-text${t.done?' done':''}">${esc(t.title)}</span>
+        <span class="task-time">${t.tag||''}</span>
+      </div>
+    `).join('');
+  }
+}
+
+function esc(s) {
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+// ========== ACTIONS ==========
+function doneOne() {
+  const ot = state.oneThing;
+  if (ot.done) return;
+  if (!ot.title) {
+    openModal('editThing');
+    return;
+  }
+
+  ot.done = true;
+  state.totalDone++;
+  state.xp += 25;
+  state.lastDoneDate = today;
+  state.streak++;
+
+  save();
+  render();
+  confetti();
+  toast('🔥 Готово! +25 XP');
+
+  setCoach(
+    '<strong>Kai:</strong> 🔥 <strong>ГОТОВО!</strong> Ты сделал это!<br>' +
+    '<span style="font-size:13px;">Дофамин получен. 🧠💥<br>Streak: 🔥 ' + state.streak + ' дн. | XP: ⭐ ' + state.xp + '</span>'
+  );
+
   if (window.Telegram && Telegram.WebApp) {
-    Telegram.WebApp.ready();
-    Telegram.WebApp.expand();
+    Telegram.WebApp.sendData(JSON.stringify({action:'done', task:ot.title, streak:state.streak, xp:state.xp}));
+  }
+}
+
+function toggleTask(i) {
+  state.tasks[i].done = !state.tasks[i].done;
+  if (state.tasks[i].done) {
+    state.xp += 10;
+    state.totalDone++;
+    toast('✅ +10 XP');
+  }
+  save();
+  render();
+}
+
+function openModal(mode) {
+  window._modalMode = mode;
+  const m = document.getElementById('modal');
+  m.classList.add('on');
+  document.getElementById('mInput').value = '';
+  document.getElementById('mInput').focus();
+
+  if (mode === 'bodyDouble') {
+    document.getElementById('mTitle').textContent = '🧑‍🤝‍🧑 Body Double';
+    document.getElementById('mInput').placeholder = 'Что будешь делать 25 мин?';
+    document.getElementById('mBtn').textContent = 'Начать! 🧘';
+  } else if (mode === 'stuck') {
+    document.getElementById('mTitle').textContent = '🆘 Что не так?';
+    document.getElementById('mInput').placeholder = 'Напиши одним словом, что висит...';
+    document.getElementById('mBtn').textContent = 'Разобрать 🧩';
+  } else if (mode === 'park') {
+    document.getElementById('mTitle').textContent = '🅿️ Паркую мысль';
+    document.getElementById('mInput').placeholder = 'Идея / задача / мысль...';
+    document.getElementById('mBtn').textContent = 'Сохранить 💾';
+  } else if (mode === 'editThing') {
+    document.getElementById('mTitle').textContent = '🎯 Одно дело на сегодня';
+    document.getElementById('mInput').placeholder = 'Что ОДНО ты сделаешь сегодня?';
+    document.getElementById('mInput').value = state.oneThing.title;
+    document.getElementById('mBtn').textContent = 'Сохранить ✅';
+  } else {
+    document.getElementById('mTitle').textContent = '✨ Новая задача';
+    document.getElementById('mInput').placeholder = 'Что хочешь сделать?';
+    document.getElementById('mBtn').textContent = 'Добавить +';
+  }
+  setTimeout(() => document.getElementById('mInput').focus(), 100);
+}
+
+function editOneThing() {
+  openModal('editThing');
+}
+
+function submitModal() {
+  const val = document.getElementById('mInput').value.trim();
+  if (!val) return;
+  const mode = window._modalMode;
+
+  if (mode === 'bodyDouble') {
+    setCoach(`<strong>Kai:</strong> "Я рядом. Ты работаешь над: <strong>${esc(val)}</strong>. 25 минут. Погнали. 🧘"`);
+    toast('🧘 Body Double начат!');
+  } else if (mode === 'stuck') {
+    setCoach(`<strong>Kai:</strong> "Окей, «${esc(val)}». Давай разберём. 🧩<br>Первый микро-шаг: просто открой, что нужно. Скажи «готово», когда сделаешь."`);
+    toast('🆘 Разбираем по шагам');
+  } else if (mode === 'park') {
+    state.tasks.push({ title: val, done: false, tag: '🅿️ Parking' });
+    save(); render();
+    setCoach(`<strong>Kai:</strong> "💡 Записал: <strong>${esc(val)}</strong> 🅿️<br>Вернёмся после текущего дела. А пока — фокус на том, что сейчас."`);
+    toast('💡 Сохранено в Parking');
+  } else if (mode === 'editThing') {
+    state.oneThing = { title: val, emoji: '🎯', project: '', time: 'сегодня', done: false };
+    save(); render();
+    setCoach(`<strong>Kai:</strong> "🎯 Твоё одно дело: <strong>${esc(val)}</strong>.<br>Это единственное, что важно сегодня."`);
+    toast('🎯 Дело записано');
+  } else {
+    state.tasks.push({ title: val, done: false, tag: '' });
+    save(); render();
+    setCoach(`<strong>Kai:</strong> "${esc(val)}" — записал. ✅`);
+    toast('✅ Задача добавлена');
   }
 
-  let oneDone = false;
-  let modalMode = 'task';
+  closeModal();
+}
 
-  function completeOne() {
-    const btn = document.getElementById('oneBtn');
-    if (oneDone) return;
-    oneDone = true;
-    btn.textContent = '✅ Готово! +25 XP';
-    btn.className = 'btn-glow done';
-    document.getElementById('coachMsg').innerHTML =
-      '<strong>Kai:</strong> 🔥 <strong>ГОТОВО!</strong> Ты сделал это!<br><span style="font-size:13px;">Дофамин получен. 🧠💥</span>';
-    if (window.Telegram && Telegram.WebApp) {
-      Telegram.WebApp.sendData(JSON.stringify({action: 'done', task: 'Нарезать батат'}));
-    }
+function closeModal() {
+  document.getElementById('modal').classList.remove('on');
+}
+
+// Close on overlay tap
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function setCoach(html) {
+  document.getElementById('coachMsg').innerHTML = html;
+}
+
+function selTab(tab) {
+  // Update tab highlights
+  ['tabToday','tabWeek','tabWins','tabAdd'].forEach(id => {
+    document.getElementById(id).classList.toggle('sel', id === 'tab'+tab.charAt(0).toUpperCase()+tab.slice(1));
+  });
+
+  if (tab === 'week') {
+    const active = state.tasks.filter(t => !t.done).map((t,i) => `${i+1}. ${t.title}`).join('<br>');
+    setCoach('<strong>Kai:</strong> 📅 В работе:<br>' + (active || '(пусто)'));
+  } else if (tab === 'wins') {
+    setCoach(`<strong>Kai:</strong> 🏆 Твои победы:<br>🔥 Streak: ${state.streak} дн.<br>✅ Сделано: ${state.totalDone}<br>⭐ Всего XP: ${state.xp}`);
+  } else if (tab === 'today') {
+    setCoach(`<strong>Kai:</strong> 🎯 Сегодняшний фокус — одно дело.`);
   }
+}
 
-  function toggleTask(el) {
-    const check = el.querySelector('.task-check');
-    const text = el.querySelector('.task-text');
-    check.classList.toggle('done');
-    text.classList.toggle('done');
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('s');
+  setTimeout(() => el.classList.remove('s'), 2200);
+}
+
+function confetti() {
+  const emojis = ['🎉','🔥','✨','💪','🧠','💥','⭐','🚀'];
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    p.style.left = Math.random()*90 + '%';
+    p.style.top = -(Math.random()*40) + 'px';
+    p.style.animationDelay = Math.random()*0.3 + 's';
+    p.style.animationDuration = (0.7 + Math.random()*0.6) + 's';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1500);
   }
+}
 
-  function openModal(mode) {
-    modalMode = mode;
-    const overlay = document.getElementById('modalOverlay');
-    overlay.classList.add('show');
-    document.getElementById('modalInput').value = '';
-
-    if (mode === 'bodyDouble') {
-      document.getElementById('modalTitle').textContent = '🧑‍🤝‍🧑 Body Double';
-      document.getElementById('modalInput').placeholder = 'Что будешь делать 25 мин?';
-      document.getElementById('modalBtn').textContent = 'Начать! 🧘';
-    } else if (mode === 'stuck') {
-      document.getElementById('modalTitle').textContent = '🆘 Что не так?';
-      document.getElementById('modalInput').placeholder = 'Напиши одним словом, что висит...';
-      document.getElementById('modalBtn').textContent = 'Разобрать 🧩';
-    } else if (mode === 'park') {
-      document.getElementById('modalTitle').textContent = '🅿️ Паркую мысль';
-      document.getElementById('modalInput').placeholder = 'Идея / задача / мысль...';
-      document.getElementById('modalBtn').textContent = 'Сохранить 💾';
-    } else {
-      document.getElementById('modalTitle').textContent = '✨ Новая задача';
-      document.getElementById('modalInput').placeholder = 'Что хочешь сделать?';
-      document.getElementById('modalBtn').textContent = 'Добавить +';
-    }
-  }
-
-  function closeModal(e) {
-    if (e && e.target !== e.currentTarget) return;
-    document.getElementById('modalOverlay').classList.remove('show');
-  }
-
-  function submitModal() {
-    const input = document.getElementById('modalInput');
-    const val = input.value.trim();
-    if (!val) return;
-
-    const coach = document.getElementById('coachMsg');
-    const overlay = document.getElementById('modalOverlay');
-
-    if (modalMode === 'bodyDouble') {
-      coach.innerHTML = `<strong>Kai:</strong> "Я рядом. Ты работаешь над: <strong>${val}</strong>. 25 минут. Погнали. 🧘"`;
-    } else if (modalMode === 'stuck') {
-      coach.innerHTML = `<strong>Kai:</strong> "Окей, «${val}». Давай разберём. 🧩<br>Первый микро-шаг: открой ноутбук. Просто открой. Скажи «готово», когда сделаешь."`;
-    } else if (modalMode === 'park') {
-      coach.innerHTML = `<strong>Kai:</strong> "💡 Записал: <strong>${val}</strong> 🅿️<br>Вернёмся после текущего дела. А пока — фокус на том, что сейчас."`;
-    } else {
-      const task = document.createElement('div');
-      task.className = 'task-item';
-      task.onclick = function() { toggleTask(this); };
-      task.innerHTML = `<div class="task-check"></div><span class="task-text">${val}</span><span class="task-time">прямо сейчас</span>`;
-      document.querySelector('.section-label').after(task);
-      coach.innerHTML = `<strong>Kai:</strong> "${val}" — записал. ✅ Это в списке на сегодня.`;
-    }
-
-    overlay.classList.remove('show');
-  }
-
-  function switchTab(tab) {
-    const coach = document.getElementById('coachMsg');
-    if (tab === 'week') {
-      coach.innerHTML = '<strong>Kai:</strong> 📅 На этой неделе:<br>1. Нарезать батат 🍠<br>2. Дверь в козлятнике 🐐<br>3. Грядки 🌱<br>4. Wow Treats упаковка 📦';
-    } else if (tab === 'wins') {
-      coach.innerHTML = '<strong>Kai:</strong> 🏆 Твои победы:<br>🔥 3 дня подряд с одним делом<br>✅ Всего сделано: 12 задач<br>⭐ Лучший день: среда (5/5 задач!)';
-    } else if (tab === 'chat') {
-      coach.innerHTML = '<strong>Kai:</strong> Просто напиши мне внизу 👇<br>Я здесь, чтобы помочь. Что случилось?';
-    } else {
-      coach.innerHTML = '<strong>Kai:</strong> 🎯 Сегодняшний фокус: одно дело.';
-    }
-  }
+// ========== INIT ==========
+render();
+if (!state.oneThing.title) {
+  document.getElementById('coachMsg').innerHTML =
+    '<strong>Kai:</strong> "Привет! 👋<br>Напиши своё <strong>одно дело</strong> на сегодня."';
+}
 </script>
 </body>
 </html>
