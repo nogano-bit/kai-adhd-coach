@@ -2,270 +2,357 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Kai — ADHD Coach</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
-    -webkit-font-smoothing:antialiased;
-    background:var(--tg-theme-bg-color,#f5f6fa);
-    color:var(--tg-theme-text-color,#1a1a2e);
-    min-height:100vh;overflow-x:hidden;
-    -webkit-tap-highlight-color:transparent;
-    user-select:none;-webkit-user-select:none;
+  :root {
+    --bg: #FBFBFD;
+    --card: #FFFFFF;
+    --text: #1D1D1F;
+    --text2: #86868B;
+    --accent: #5B5BD6;
+    --accent-soft: #EEEDFC;
+    --border: #E8E8ED;
+    --green: #34C759;
+    --red: #FF3B30;
+    --radius: 14px;
+    --radius-sm: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.06);
+    --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+    --safe-bottom: env(safe-area-inset-bottom, 8px);
   }
-  .header{
-    background:linear-gradient(135deg,#6c63ff 0%,#8b83ff 50%,#b8a9ff 100%);
-    padding:44px 20px 28px;color:#fff;position:relative;overflow:hidden;
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #000000;
+      --card: #1C1C1E;
+      --text: #F5F5F7;
+      --text2: #98989D;
+      --accent: #7B7BEB;
+      --accent-soft: #1C1C2E;
+      --border: #2C2C2E;
+    }
   }
-  .header::after{
-    content:'';position:absolute;top:-60px;right:-40px;
-    width:180px;height:180px;background:rgba(255,255,255,0.06);
-    border-radius:50%;
-  }
-  .header h1{font-size:26px;font-weight:700;letter-spacing:-0.4px;position:relative;z-index:1}
-  .header .sub{font-size:14px;opacity:.85;margin-top:2px;position:relative;z-index:1}
-  .streak-badge{
-    position:absolute;top:14px;right:20px;z-index:2;
-    background:rgba(255,255,255,.18);backdrop-filter:blur(6px);
-    border-radius:20px;padding:5px 14px;font-size:13px;font-weight:600;
-    display:flex;align-items:center;gap:6px;
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none; -webkit-user-select: none;
+    padding-bottom: calc(72px + var(--safe-bottom));
   }
 
-  /* ONE THING */
-  .one-thing{
-    margin:-20px 14px 0;background:var(--tg-theme-section-bg-color,#fff);
-    border-radius:18px;padding:18px;position:relative;z-index:10;
-    box-shadow:0 6px 24px rgba(108,99,255,.14);
+  /* HEADER */
+  .top {
+    padding: 48px 20px 24px;
+    position: relative;
   }
-  .one-thing-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:#6c63ff;margin-bottom:10px}
-  .one-thing-row{display:flex;align-items:center;gap:12px}
-  .one-thing-emoji{font-size:28px;width:46px;height:46px;background:#f0eeff;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .one-thing-text{flex:1;min-width:0}
-  .one-thing-title{font-size:16px;font-weight:700}
-  .one-thing-title.done{text-decoration:line-through;color:#aaa}
-  .one-thing-time{font-size:12px;color:#999;margin-top:2px}
-  .btn-done{
-    background:#6c63ff;color:#fff;border:none;border-radius:12px;
-    padding:12px 20px;font-size:14px;font-weight:600;cursor:pointer;
-    font-family:inherit;white-space:nowrap;
-    box-shadow:0 4px 12px rgba(108,99,255,.3);
-    transition:all .2s;flex-shrink:0;
+  .top h1 {
+    font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
+    line-height: 1.15;
   }
-  .btn-done:active{transform:scale(.94)}
-  .btn-done.completed{background:#00c48c;box-shadow:0 4px 12px rgba(0,196,140,.3)}
+  .top .wave {
+    display: inline-block;
+    animation: wave .8s ease-in-out;
+  }
+  @keyframes wave {
+    0%,100% { transform: rotate(0) }
+    25% { transform: rotate(8deg) }
+    75% { transform: rotate(-8deg) }
+  }
+  .top .ctx {
+    font-size: 15px; color: var(--text2); margin-top: 4px; font-weight: 400;
+  }
 
-  /* COACH BUBBLE */
-  .coach{
-    margin:12px 14px;background:#f0eeff;border-radius:16px 16px 16px 4px;
-    padding:14px;display:flex;gap:10px;align-items:flex-start;
-    transition:all .3s;
+  /* STREAK PILL */
+  .streak-pill {
+    position: absolute; top: 18px; right: 20px;
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 5px 14px;
+    font-size: 13px; font-weight: 600; color: var(--text2);
+    box-shadow: var(--shadow);
   }
-  .coach-avatar{
-    width:34px;height:34px;background:#6c63ff;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    color:#fff;font-size:15px;flex-shrink:0;
-  }
-  .coach-msg{font-size:14px;line-height:1.5;color:#2d2d44;flex:1}
-  .coach-msg strong{color:#6c63ff}
+  .streak-pill .n { color: var(--accent); font-weight: 700 }
 
-  /* SECTION */
-  .sec{
-    padding:20px 16px 6px;font-size:12px;font-weight:600;
-    color:#6c63ff;text-transform:uppercase;letter-spacing:1px;
+  /* ONE THING — hero card */
+  .hero {
+    margin: 0 16px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 18px;
+    box-shadow: var(--shadow);
+  }
+  .hero-label {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1.8px; color: var(--accent); margin-bottom: 10px;
+  }
+  .hero-row { display: flex; align-items: flex-start; gap: 14px }
+  .hero-icon {
+    font-size: 26px; width: 44px; height: 44px;
+    background: var(--accent-soft); border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .hero-body { flex: 1; min-width: 0 }
+  .hero-title { font-size: 18px; font-weight: 600; line-height: 1.3; transition: all .3s }
+  .hero-title.done { text-decoration: line-through; color: var(--text2) }
+  .hero-meta { font-size: 13px; color: var(--text2); margin-top: 2px }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    border: none; border-radius: var(--radius-sm);
+    padding: 10px 20px; font-size: 14px; font-weight: 600;
+    font-family: var(--font); cursor: pointer; transition: all .2s;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .btn:active { transform: scale(.96) }
+  .btn-fill { background: var(--accent); color: #fff }
+  .btn-fill.completed { background: var(--green) }
+  .btn-ghost {
+    background: transparent; color: var(--accent);
+    padding: 8px 14px; font-size: 13px;
+  }
+
+  /* COACH */
+  .coach {
+    margin: 0 16px 20px;
+    background: var(--accent-soft);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex; gap: 10px; align-items: flex-start;
+    transition: all .3s;
+  }
+  .coach-avatar {
+    width: 32px; height: 32px; background: var(--accent); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 14px; flex-shrink: 0;
+  }
+  .coach-body { flex: 1; font-size: 14px; line-height: 1.55 }
+  .coach-body .say { color: var(--text) }
+  .coach-body .ask { color: var(--accent); font-weight: 500 }
+
+  /* SECTION HEADER */
+  .sec {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px 6px;
+  }
+  .sec h2 {
+    font-size: 13px; font-weight: 600; color: var(--text2);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .sec .badge {
+    font-size: 12px; font-weight: 600; color: var(--accent);
+    background: var(--accent-soft); border-radius: 20px;
+    padding: 2px 10px;
   }
 
   /* TASKS */
-  .task{
-    background:var(--tg-theme-section-bg-color,#fff);
-    border-radius:13px;padding:13px 14px;display:flex;align-items:center;
-    gap:10px;margin:0 14px 5px;cursor:pointer;
-    box-shadow:0 1px 6px rgba(0,0,0,.04);transition:all .15s;
+  .tasks { margin: 0 16px }
+  .task {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 5px; cursor: pointer; transition: all .15s;
+    box-shadow: var(--shadow);
   }
-  .task:active{transform:scale(.97)}
-  .task-check{
-    width:22px;height:22px;border:2px solid #d0d0e0;border-radius:50%;
-    flex-shrink:0;display:flex;align-items:center;justify-content:center;
-    transition:all .2s;
+  .task:active { transform: scale(.98) }
+  .task-check {
+    width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 50%;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
   }
-  .task-check.done{background:#6c63ff;border-color:#6c63ff}
-  .task-check.done::after{content:'✓';color:#fff;font-size:12px;font-weight:700}
-  .task-text{flex:1;font-size:14px;font-weight:500}
-  .task-text.done{text-decoration:line-through;color:#bbb}
-  .task-time{font-size:11px;color:#bbb;font-weight:500}
+  .task-check.done { background: var(--green); border-color: var(--green) }
+  .task-check.done::after { content: '✓'; color: #fff; font-size: 11px; font-weight: 700 }
+  .task-body { flex: 1; min-width: 0 }
+  .task-title { font-size: 14px; font-weight: 500; line-height: 1.3 }
+  .task-title.done { text-decoration: line-through; color: var(--text2) }
+  .task-tag { font-size: 11px; color: var(--text2); margin-top: 1px }
+
+  .empty {
+    text-align: center; padding: 24px 20px;
+    color: var(--text2); font-size: 14px;
+    line-height: 1.5;
+  }
 
   /* ACTIONS */
-  .actions{margin:0 14px}
-  .act{
-    background:var(--tg-theme-section-bg-color,#fff);
-    border-radius:13px;padding:14px 15px;display:flex;align-items:center;
-    gap:11px;margin-bottom:6px;cursor:pointer;transition:all .15s;
-    box-shadow:0 1px 6px rgba(0,0,0,.04);
+  .actions { margin: 0 16px }
+  .act {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 13px 15px;
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 5px; cursor: pointer; transition: all .15s;
+    box-shadow: var(--shadow);
   }
-  .act:active{transform:scale(.97)}
-  .act-icon{font-size:22px;width:30px;text-align:center}
-  .act-text{flex:1;font-size:15px;font-weight:500}
-  .act-arrow{color:#ccc;font-size:16px}
+  .act:active { transform: scale(.98) }
+  .act-ico { font-size: 20px; width: 28px; text-align: center }
+  .act-txt { flex: 1; font-size: 14px; font-weight: 500 }
+  .act-sub { font-size: 12px; color: var(--text2) }
 
-  /* BOTTOM NAV */
-  .bottom{
-    position:fixed;bottom:0;left:0;right:0;height:66px;
-    background:var(--tg-theme-section-bg-color,#fff);
-    border-top:1px solid #eee;display:flex;justify-content:space-around;
-    align-items:center;padding-bottom:6px;z-index:50;
+  /* BOTTOM */
+  .bottom {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--card); border-top: 1px solid var(--border);
+    display: flex; justify-content: space-around; align-items: center;
+    padding: 6px 0 var(--safe-bottom);
+    z-index: 50;
   }
-  .tab{
-    display:flex;flex-direction:column;align-items:center;gap:2px;
-    font-size:10px;color:#bbb;cursor:pointer;padding:6px 14px;
-    transition:all .15s;
+  .tab {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2px; font-size: 10px; color: var(--text2);
+    cursor: pointer; padding: 6px 16px; transition: all .15s;
   }
-  .tab.sel{color:#6c63ff}
-  .tab-icon{font-size:22px}
+  .tab.sel { color: var(--accent) }
+  .tab-icon { font-size: 22px }
 
   /* MODAL */
-  .m-overlay{
-    position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;
-    display:none;align-items:flex-end;justify-content:center;
+  .m-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,.4);
+    z-index: 200; display: none; align-items: flex-end; justify-content: center;
   }
-  .m-overlay.on{display:flex}
-  .m-sheet{
-    background:var(--tg-theme-section-bg-color,#fff);
-    border-radius:22px 22px 0 0;width:100%;max-width:420px;
-    padding:22px 20px 36px;animation:up .28s ease;
+  .m-bg.on { display: flex }
+  .m-sh {
+    background: var(--card); border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 420px; padding: 20px 20px 34px;
+    animation: mup .25s ease;
+    box-shadow: 0 -4px 20px rgba(0,0,0,.08);
   }
-  @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
-  .m-bar{width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 14px}
-  .m-title{font-size:17px;font-weight:700;margin-bottom:10px}
-  .m-input{
-    width:100%;border:2px solid #e8e8f0;border-radius:13px;
-    padding:13px 15px;font-size:16px;font-family:inherit;outline:none;
-    margin-bottom:10px;-webkit-appearance:none;
+  @keyframes mup { from { transform: translateY(100%) } to { transform: translateY(0) } }
+  .m-hdl { width: 32px; height: 3px; background: var(--border); border-radius: 2px; margin: 0 auto 14px }
+  .m-ttl { font-size: 17px; font-weight: 700; margin-bottom: 10px }
+  .m-inp {
+    width: 100%; border: 2px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 15px; font-size: 16px; font-family: var(--font);
+    outline: none; margin-bottom: 10px; background: var(--bg); color: var(--text);
+    -webkit-appearance: none; transition: border .2s;
   }
-  .m-input:focus{border-color:#6c63ff}
-  .m-btn{
-    width:100%;background:#6c63ff;color:#fff;border:none;border-radius:13px;
-    padding:13px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;
+  .m-inp:focus { border-color: var(--accent) }
+  .m-btn {
+    width: 100%; background: var(--accent); color: #fff; border: none;
+    border-radius: var(--radius-sm); padding: 13px;
+    font-size: 16px; font-weight: 600; cursor: pointer; font-family: var(--font);
   }
-  .m-btn:active{background:#5b52e0}
+  .m-btn:active { opacity: .85 }
 
   /* TOAST */
-  .toast{
-    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-120px);
-    background:#00c48c;color:#fff;border-radius:14px;padding:12px 22px;
-    font-weight:600;font-size:14px;z-index:300;pointer-events:none;
-    transition:transform .35s cubic-bezier(.68,-.55,.265,1.55);
-    box-shadow:0 6px 20px rgba(0,196,140,.35);
+  .toast {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-120px);
+    background: var(--card); color: var(--text); border-radius: var(--radius-sm);
+    padding: 10px 20px; font-weight: 500; font-size: 14px; z-index: 300;
+    pointer-events: none; transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+    box-shadow: 0 8px 24px rgba(0,0,0,.12); border: 1px solid var(--border);
   }
-  .toast.s{transform:translateX(-50%) translateY(0)}
+  .toast.s { transform: translateX(-50%) translateY(0) }
 
-  /* CONFETTI */
-  .confetti-piece{
-    position:fixed;z-index:250;pointer-events:none;
-    font-size:22px;animation:fall .8s ease-out forwards;
+  /* DONE PULSE */
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(52,199,89,.4) }
+    70% { box-shadow: 0 0 0 12px rgba(52,199,89,0) }
+    100% { box-shadow: 0 0 0 0 rgba(52,199,89,0) }
   }
-  @keyframes fall{
-    0%{transform:translateY(0) rotate(0deg);opacity:1}
-    100%{transform:translateY(100vh) rotate(720deg);opacity:0}
-  }
-
-  .edit-btn{
-    position:absolute;top:10px;left:10px;z-index:12;
-    background:rgba(255,255,255,.2);border:none;border-radius:10px;
-    width:32px;height:32px;display:flex;align-items:center;justify-content:center;
-    font-size:16px;cursor:pointer;color:#fff;
+  .pulse {
+    animation: pulse .6s ease-out;
   }
 
-  .empty-state{
-    text-align:center;padding:30px 20px;color:#bbb;font-size:14px;
+  /* BREATHING DOT */
+  .breath-dot {
+    display: inline-block; width: 6px; height: 6px;
+    background: var(--accent); border-radius: 50%;
+    margin-right: 6px;
+    animation: breathe 1.5s ease-in-out infinite;
   }
-  .xp-badge{
-    background:#f0eeff;color:#6c63ff;border-radius:10px;
-    padding:2px 8px;font-size:11px;font-weight:600;
+  @keyframes breathe {
+    0%,100% { opacity: 0.4; transform: scale(1) }
+    50% { opacity: 1; transform: scale(1.3) }
   }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="streak-badge" id="streakBadge">🔥 <span id="streakNum">0</span></div>
-  <button class="edit-btn" onclick="editOneThing()" title="Изменить дело">✏️</button>
-  <h1>Привет, Костя ☀️</h1>
-  <div class="sub">Твой ADHD-коуч. Одно дело за раз.</div>
+<!-- HEADER -->
+<div class="top">
+  <div class="streak-pill" id="streakPill" style="display:none">🔥&nbsp;<span class="n" id="streakNum">0</span></div>
+  <h1>Доброе утро, Костя<span class="wave">☀️</span></h1>
+  <div class="ctx" id="ctxLine">АнтиХаос — одно дело за раз</div>
 </div>
 
-<!-- ONE THING -->
-<div class="one-thing" id="oneThingCard">
-  <div class="one-thing-label">🎯 Одно дело на сегодня</div>
-  <div class="one-thing-row">
-    <div class="one-thing-emoji" id="oneEmoji">🍠</div>
-    <div class="one-thing-text">
-      <div class="one-thing-title" id="oneTitle">Без дела</div>
-      <div class="one-thing-time" id="oneMeta"></div>
+<!-- HERO -->
+<div class="hero" id="heroCard">
+  <div class="hero-label">Одно дело</div>
+  <div class="hero-row">
+    <div class="hero-icon" id="heroIcon">🎯</div>
+    <div class="hero-body">
+      <div class="hero-title" id="heroTitle">Пока пусто</div>
+      <div class="hero-meta" id="heroMeta">Нажми «Задать», чтобы начать</div>
     </div>
-    <button class="btn-done" id="oneBtn" onclick="doneOne()">🔥 Сделать</button>
+    <button class="btn btn-fill" id="heroBtn" onclick="doHero()">Задать</button>
   </div>
 </div>
 
 <!-- COACH -->
-<div class="coach" id="coachBubble">
+<div class="coach" id="coachBox">
   <div class="coach-avatar">🧘</div>
-  <div class="coach-msg" id="coachMsg">
-    <strong>Kai:</strong> "Привет! 👋<br>Напиши одно дело на сегодня. Только одно."
+  <div class="coach-body" id="coachBody">
+    <span class="say">Привет. Я Kai — твой ADHD-коуч.</span><br>
+    <span class="ask">Какое <strong>одно дело</strong> сделает сегодняшний день успешным?</span>
   </div>
 </div>
 
 <!-- TASKS -->
-<div class="sec">📋 Сегодня</div>
-<div id="taskList">
-  <div class="empty-state">Нажми + чтобы добавить задачу</div>
+<div class="sec">
+  <h2>Сегодня</h2>
+  <span class="badge" id="taskCount" style="display:none"></span>
+</div>
+<div class="tasks" id="taskList">
+  <div class="empty">Добавьте задачу через вкладку <strong>+</strong> внизу</div>
 </div>
 
 <!-- ACTIONS -->
-<div class="sec">⚡ Быстрые действия</div>
+<div class="sec"><h2>Быстрые действия</h2></div>
 <div class="actions">
-  <div class="act" ontouchend="openModal('bodyDouble')" onclick="openModal('bodyDouble')">
-    <div class="act-icon">🧑‍🤝‍🧑</div>
-    <div class="act-text">Body Double (25 мин)</div>
-    <div class="act-arrow">→</div>
+  <div class="act" ontouchend="openM('focus')" onclick="openM('focus')">
+    <div class="act-ico">⏱️</div>
+    <div class="act-txt">Фокус-сессия</div>
+    <div class="act-sub">25 мин</div>
   </div>
-  <div class="act" ontouchend="openModal('stuck')" onclick="openModal('stuck')">
-    <div class="act-icon">🆘</div>
-    <div class="act-text">Я застрял / overwhelmed</div>
-    <div class="act-arrow">→</div>
+  <div class="act" ontouchend="openM('stuck')" onclick="openM('stuck')">
+    <div class="act-ico">🧩</div>
+    <div class="act-txt">Я застрял</div>
+    <div class="act-sub">Разобрать по шагам</div>
   </div>
-  <div class="act" ontouchend="openModal('park')" onclick="openModal('park')">
-    <div class="act-icon">🅿️</div>
-    <div class="act-text">Parking Lot</div>
-    <div class="act-arrow">→</div>
+  <div class="act" ontouchend="openM('park')" onclick="openM('park')">
+    <div class="act-ico">📌</div>
+    <div class="act-txt">Парковка идей</div>
+    <div class="act-sub">Сохранить на потом</div>
   </div>
 </div>
 
 <!-- BOTTOM -->
 <div class="bottom">
-  <div class="tab sel" id="tabToday" onclick="selTab('today')">
-    <span class="tab-icon">🎯</span><span>Сегодня</span>
+  <div class="tab sel" id="tToday" onclick="selTab('today')">
+    <span class="tab-icon">📋</span><span>Сегодня</span>
   </div>
-  <div class="tab" id="tabWeek" onclick="selTab('week')">
-    <span class="tab-icon">📅</span><span>Неделя</span>
+  <div class="tab" id="tWeek" onclick="selTab('week')">
+    <span class="tab-icon">📅</span><span>Обзор</span>
   </div>
-  <div class="tab" id="tabWins" onclick="selTab('wins')">
-    <span class="tab-icon">🏆</span><span>Победы</span>
+  <div class="tab" id="tWins" onclick="selTab('wins')">
+    <span class="tab-icon">📊</span><span>Прогресс</span>
   </div>
-  <div class="tab" id="tabAdd" onclick="openModal('add')">
-    <span class="tab-icon">➕</span><span>Добавить</span>
+  <div class="tab" id="tAdd" onclick="openM('add')">
+    <span class="tab-icon">+</span><span>Добавить</span>
   </div>
 </div>
 
 <!-- MODAL -->
-<div class="m-overlay" id="modal">
-  <div class="m-sheet" onclick="event.stopPropagation()" ontouchend="event.stopPropagation()">
-    <div class="m-bar"></div>
-    <div class="m-title" id="mTitle">Новая задача</div>
-    <input class="m-input" id="mInput" placeholder="Что хочешь сделать?" autocomplete="off">
-    <button class="m-btn" id="mBtn" onclick="submitModal()">Добавить +</button>
+<div class="m-bg" id="modal" onclick="closeM(event)">
+  <div class="m-sh" onclick="event.stopPropagation()" ontouchend="event.stopPropagation()">
+    <div class="m-hdl"></div>
+    <div class="m-ttl" id="mTitle">Новая задача</div>
+    <input class="m-inp" id="mInput" placeholder="Что нужно сделать?" autocomplete="off">
+    <button class="m-btn" id="mBtn" onclick="submitM()">Добавить</button>
   </div>
 </div>
 
@@ -273,254 +360,183 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ========== Init Telegram ==========
-if (window.Telegram && Telegram.WebApp) {
+// ——— Telegram ———
+if (window.Telegram?.WebApp) {
   Telegram.WebApp.ready();
   Telegram.WebApp.expand();
+  // Sync theme
+  const cs = Telegram.WebApp.colorScheme;
+  if (cs === 'dark') document.documentElement.style.setProperty('--bg','#000');
 }
 
-// ========== STATE ENGINE ==========
+// ——— State (localStorage) ———
 const LS = {
-  get(k, def) {
-    try { const v = localStorage.getItem('kai_'+k); return v ? JSON.parse(v) : def }
-    catch { return def }
-  },
-  set(k, v) { try { localStorage.setItem('kai_'+k, JSON.stringify(v)) } catch {} }
+  get(k,d) { try { const v=localStorage.getItem('kai_'+k); return v?JSON.parse(v):d } catch { return d } },
+  set(k,v) { try { localStorage.setItem('kai_'+k,JSON.stringify(v)) } catch {} }
 };
-
-// Daily key check — reset on new day
-const today = new Date().toISOString().split('T')[0];
-let state = LS.get('state', {
-  date: today,
-  oneThing: { title: '', emoji: '🎯', project: '', time: '~5 мин', done: false },
-  tasks: [],
-  streak: 0,
-  totalDone: 0,
-  xp: 0,
-  lastDoneDate: null
-});
-
-// Reset daily if new day
-if (state.date !== today) {
-  const wasDoneYesterday = state.lastDoneDate === state.date;
-  state.date = today;
-  state.oneThing = { title: '', emoji: '🎯', project: '', time: '~5 мин', done: false };
-  state.tasks = state.tasks.filter(t => !t.done); // keep undone tasks
-  if (!wasDoneYesterday && state.streak > 0) state.streak = 0; // reset streak if missed yesterday
-  LS.set('state', state);
+const T = new Date().toISOString().split('T')[0];
+let S = LS.get('state', { date:T, hero:{title:'',emoji:'🎯',time:'',done:false}, tasks:[], streak:0, total:0, lastDate:null });
+if (S.date!==T) {
+  const yesterday = S.lastDate===S.date;
+  S.date=T; S.hero={title:'',emoji:'🎯',time:'',done:false};
+  S.tasks=S.tasks.filter(t=>!t.done);
+  if (!yesterday&&S.streak>0) S.streak=0;
+  LS.set('state',S);
 }
+function save() { LS.set('state',S) }
 
-function save() { LS.set('state', state) }
-
-// ========== RENDER ==========
+// ——— RENDER ———
 function render() {
-  // Streak
-  document.getElementById('streakNum').textContent = state.streak;
-  document.getElementById('streakBadge').style.display = state.streak > 0 ? 'flex' : 'none';
+  const sp = document.getElementById('streakPill');
+  sp.style.display = S.streak>0?'inline-flex':'none';
+  document.getElementById('streakNum').textContent = S.streak;
 
-  // One thing
-  const ot = state.oneThing;
-  document.getElementById('oneEmoji').textContent = ot.emoji;
-  document.getElementById('oneTitle').textContent = ot.title || 'Без дела';
-  document.getElementById('oneTitle').classList.toggle('done', ot.done);
-  document.getElementById('oneMeta').textContent = ot.project ? `${ot.project} · ${ot.time}` : '';
-  const btn = document.getElementById('oneBtn');
-  if (ot.done) {
-    btn.textContent = '✅ Готово!';
-    btn.className = 'btn-done completed';
-  } else if (ot.title) {
-    btn.textContent = '🔥 Сделать';
-    btn.className = 'btn-done';
-  } else {
-    btn.textContent = '+ Задать';
-    btn.className = 'btn-done';
-  }
-  document.getElementById('oneThingCard').style.display = '';
+  const h = S.hero;
+  document.getElementById('heroIcon').textContent = h.emoji;
+  document.getElementById('heroTitle').textContent = h.title||'Пока пусто';
+  document.getElementById('heroTitle').classList.toggle('done',h.done);
+  document.getElementById('heroMeta').textContent = h.time||(h.title?'сегодня':'Нажми «Задать», чтобы начать');
+  const hb = document.getElementById('heroBtn');
+  if (h.done) { hb.textContent='Готово ✓'; hb.className='btn btn-fill completed'; }
+  else if (h.title) { hb.textContent='Сделать'; hb.className='btn btn-fill'; }
+  else { hb.textContent='Задать'; hb.className='btn btn-fill'; }
 
   // Tasks
-  const list = document.getElementById('taskList');
-  if (state.tasks.length === 0) {
-    list.innerHTML = '<div class="empty-state">Нажми + чтобы добавить задачу</div>';
+  const tl = document.getElementById('taskList');
+  const active = S.tasks.filter(t=>!t.done);
+  const tc = document.getElementById('taskCount');
+  if (active.length) { tc.style.display=''; tc.textContent=active.length; }
+  else tc.style.display='none';
+
+  if (!S.tasks.length) {
+    tl.innerHTML = '<div class="empty">Добавьте задачу через вкладку <strong>+</strong> внизу</div>';
   } else {
-    list.innerHTML = state.tasks.map((t,i) => `
-      <div class="task" ontouchend="toggleTask(${i})" onclick="toggleTask(${i})">
+    tl.innerHTML = S.tasks.map((t,i)=>`
+      <div class="task" ontouchend="tog(${i})" onclick="tog(${i})">
         <div class="task-check${t.done?' done':''}"></div>
-        <span class="task-text${t.done?' done':''}">${esc(t.title)}</span>
-        <span class="task-time">${t.tag||''}</span>
+        <div class="task-body">
+          <div class="task-title${t.done?' done':''}">${esc(t.title)}</div>
+          ${t.tag?`<div class="task-tag">${esc(t.tag)}</div>`:''}
+        </div>
       </div>
     `).join('');
   }
+
+  // Context line
+  const ctx = document.getElementById('ctxLine');
+  if (h.done) ctx.textContent = 'Дело сделано — день удался ✓';
+  else if (h.title) ctx.textContent = h.time||'Одно дело — всё остальное подождёт';
+  else ctx.textContent = 'АнтиХаос — одно дело за раз';
 }
+function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML }
 
-function esc(s) {
-  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
-}
+// ——— ACTIONS ———
+function doHero() {
+  const h = S.hero;
+  if (h.done) return;
+  if (!h.title) { openM('hero'); return }
 
-// ========== ACTIONS ==========
-function doneOne() {
-  const ot = state.oneThing;
-  if (ot.done) return;
-  if (!ot.title) {
-    openModal('editThing');
-    return;
-  }
+  h.done=true; S.total++; S.streak++; S.lastDate=T;
+  save(); render();
 
-  ot.done = true;
-  state.totalDone++;
-  state.xp += 25;
-  state.lastDoneDate = today;
-  state.streak++;
+  document.getElementById('heroCard').classList.add('pulse');
+  setTimeout(()=>document.getElementById('heroCard').classList.remove('pulse'),600);
 
-  save();
-  render();
-  confetti();
-  toast('🔥 Готово! +25 XP');
-
-  setCoach(
-    '<strong>Kai:</strong> 🔥 <strong>ГОТОВО!</strong> Ты сделал это!<br>' +
-    '<span style="font-size:13px;">Дофамин получен. 🧠💥<br>Streak: 🔥 ' + state.streak + ' дн. | XP: ⭐ ' + state.xp + '</span>'
+  coachSay(
+    'Сделано. <strong>Отлично.</strong>','<br>',
+    'Ты выполнил то, что запланировал. Это builds momentum.',
+    S.streak>1?`<br><span style="font-size:13px;opacity:.7">Streak: ${S.streak} дн.</span>`:''
   );
-
-  if (window.Telegram && Telegram.WebApp) {
-    Telegram.WebApp.sendData(JSON.stringify({action:'done', task:ot.title, streak:state.streak, xp:state.xp}));
-  }
+  toast('✓ Сделано');
 }
 
-function toggleTask(i) {
-  state.tasks[i].done = !state.tasks[i].done;
-  if (state.tasks[i].done) {
-    state.xp += 10;
-    state.totalDone++;
-    toast('✅ +10 XP');
-  }
-  save();
-  render();
+function tog(i) {
+  S.tasks[i].done=!S.tasks[i].done;
+  if (S.tasks[i].done) { S.total++; coachSay('Ещё одна задача выполнена. <strong>Хорошо.</strong>'); toast('✓ Готово'); }
+  save(); render();
 }
 
-function openModal(mode) {
-  window._modalMode = mode;
-  const m = document.getElementById('modal');
-  m.classList.add('on');
-  document.getElementById('mInput').value = '';
-  document.getElementById('mInput').focus();
+// ——— COACH ———
+function coachSay(...parts) {
+  document.getElementById('coachBody').innerHTML = `<span class="say">${parts.join('')}</span>`;
+}
 
-  if (mode === 'bodyDouble') {
-    document.getElementById('mTitle').textContent = '🧑‍🤝‍🧑 Body Double';
-    document.getElementById('mInput').placeholder = 'Что будешь делать 25 мин?';
-    document.getElementById('mBtn').textContent = 'Начать! 🧘';
-  } else if (mode === 'stuck') {
-    document.getElementById('mTitle').textContent = '🆘 Что не так?';
-    document.getElementById('mInput').placeholder = 'Напиши одним словом, что висит...';
-    document.getElementById('mBtn').textContent = 'Разобрать 🧩';
-  } else if (mode === 'park') {
-    document.getElementById('mTitle').textContent = '🅿️ Паркую мысль';
-    document.getElementById('mInput').placeholder = 'Идея / задача / мысль...';
-    document.getElementById('mBtn').textContent = 'Сохранить 💾';
-  } else if (mode === 'editThing') {
-    document.getElementById('mTitle').textContent = '🎯 Одно дело на сегодня';
-    document.getElementById('mInput').placeholder = 'Что ОДНО ты сделаешь сегодня?';
-    document.getElementById('mInput').value = state.oneThing.title;
-    document.getElementById('mBtn').textContent = 'Сохранить ✅';
+// ——— MODAL ———
+let mMode = '';
+function openM(mode) {
+  mMode=mode;
+  document.getElementById('modal').classList.add('on');
+  const inp=document.getElementById('mInput'); inp.value=''; inp.focus();
+
+  const titles = {
+    focus: ['⏱️ Фокус-сессия','Над чем хочешь поработать 25 минут?','Начать'],
+    stuck: ['🧩 Разбираем','Что именно застряло? Одним словом.','Разобрать'],
+    park:  ['📌 Парковка','Идея или мысль, которую хочешь сохранить?','Сохранить'],
+    hero:  ['Одно дело','Какое одно дело сделает день успешным?','Задать'],
+    add:   ['Новая задача','Что нужно сделать?','Добавить']
+  };
+  const t = titles[mode]||titles.add;
+  document.getElementById('mTitle').textContent=t[0];
+  inp.placeholder=t[1];
+  document.getElementById('mBtn').textContent=t[2];
+  if (mode==='hero'&&S.hero.title) inp.value=S.hero.title;
+
+  setTimeout(()=>inp.focus(),120);
+}
+function closeM(e) { if (!e||e.target===document.getElementById('modal')) document.getElementById('modal').classList.remove('on') }
+function submitM() {
+  const v = document.getElementById('mInput').value.trim();
+  if (!v) return;
+
+  if (mMode==='focus') {
+    coachSay('Фокус-сессия: <strong>25 минут</strong>.','<br>','Работаем над: «'+esc(v)+'». Я рядом.');
+    toast('⏱️ 25 мин');
+  } else if (mMode==='stuck') {
+    coachSay('Окей, «'+esc(v)+'».','<br>','<strong>Первый микро-шаг:</strong> просто открой то, что связано с этой задачей. Скажи мне, когда сделаешь — дам следующий шаг.');
+    toast('🧩 Шаг 1');
+  } else if (mMode==='park') {
+    S.tasks.push({title:v,done:false,tag:'Парковка'});
+    save(); render();
+    coachSay('Записал: <strong>'+esc(v)+'</strong>.','<br>','Вернёмся к этому позже. Сейчас — фокус на главном.');
+    toast('📌 Сохранено');
+  } else if (mMode==='hero') {
+    S.hero={title:v,emoji:'🎯',time:'сегодня',done:false};
+    save(); render();
+    coachSay('Понял. <strong>'+esc(v)+'</strong>.','<br>','Это твоё одно дело. Всё остальное — после него.');
+    toast('✓ Записано');
   } else {
-    document.getElementById('mTitle').textContent = '✨ Новая задача';
-    document.getElementById('mInput').placeholder = 'Что хочешь сделать?';
-    document.getElementById('mBtn').textContent = 'Добавить +';
+    S.tasks.push({title:v,done:false,tag:''});
+    save(); render();
+    coachSay('Добавил: <strong>'+esc(v)+'</strong>.');
+    toast('+ Задача');
   }
-  setTimeout(() => document.getElementById('mInput').focus(), 100);
+  closeM();
 }
 
-function editOneThing() {
-  openModal('editThing');
-}
-
-function submitModal() {
-  const val = document.getElementById('mInput').value.trim();
-  if (!val) return;
-  const mode = window._modalMode;
-
-  if (mode === 'bodyDouble') {
-    setCoach(`<strong>Kai:</strong> "Я рядом. Ты работаешь над: <strong>${esc(val)}</strong>. 25 минут. Погнали. 🧘"`);
-    toast('🧘 Body Double начат!');
-  } else if (mode === 'stuck') {
-    setCoach(`<strong>Kai:</strong> "Окей, «${esc(val)}». Давай разберём. 🧩<br>Первый микро-шаг: просто открой, что нужно. Скажи «готово», когда сделаешь."`);
-    toast('🆘 Разбираем по шагам');
-  } else if (mode === 'park') {
-    state.tasks.push({ title: val, done: false, tag: '🅿️ Parking' });
-    save(); render();
-    setCoach(`<strong>Kai:</strong> "💡 Записал: <strong>${esc(val)}</strong> 🅿️<br>Вернёмся после текущего дела. А пока — фокус на том, что сейчас."`);
-    toast('💡 Сохранено в Parking');
-  } else if (mode === 'editThing') {
-    state.oneThing = { title: val, emoji: '🎯', project: '', time: 'сегодня', done: false };
-    save(); render();
-    setCoach(`<strong>Kai:</strong> "🎯 Твоё одно дело: <strong>${esc(val)}</strong>.<br>Это единственное, что важно сегодня."`);
-    toast('🎯 Дело записано');
+// ——— TABS ———
+function selTab(t) {
+  ['tToday','tWeek','tWins','tAdd'].forEach(id=>document.getElementById(id).classList.toggle('sel',id==='t'+t.charAt(0).toUpperCase()+t.slice(1)));
+  if (t==='week') {
+    const a=S.tasks.filter(x=>!x.done);
+    coachSay('<strong>В работе:</strong>','<br>',a.length?a.map((x,i)=>`${i+1}. ${x.title}`).join('<br>'):'Пока пусто.');
+  } else if (t==='wins') {
+    coachSay(`<strong>Прогресс:</strong><br>✓ Выполнено: ${S.total}<br>🔥 Streak: ${S.streak} дн.`);
   } else {
-    state.tasks.push({ title: val, done: false, tag: '' });
-    save(); render();
-    setCoach(`<strong>Kai:</strong> "${esc(val)}" — записал. ✅`);
-    toast('✅ Задача добавлена');
-  }
-
-  closeModal();
-}
-
-function closeModal() {
-  document.getElementById('modal').classList.remove('on');
-}
-
-// Close on overlay tap
-document.getElementById('modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-function setCoach(html) {
-  document.getElementById('coachMsg').innerHTML = html;
-}
-
-function selTab(tab) {
-  // Update tab highlights
-  ['tabToday','tabWeek','tabWins','tabAdd'].forEach(id => {
-    document.getElementById(id).classList.toggle('sel', id === 'tab'+tab.charAt(0).toUpperCase()+tab.slice(1));
-  });
-
-  if (tab === 'week') {
-    const active = state.tasks.filter(t => !t.done).map((t,i) => `${i+1}. ${t.title}`).join('<br>');
-    setCoach('<strong>Kai:</strong> 📅 В работе:<br>' + (active || '(пусто)'));
-  } else if (tab === 'wins') {
-    setCoach(`<strong>Kai:</strong> 🏆 Твои победы:<br>🔥 Streak: ${state.streak} дн.<br>✅ Сделано: ${state.totalDone}<br>⭐ Всего XP: ${state.xp}`);
-  } else if (tab === 'today') {
-    setCoach(`<strong>Kai:</strong> 🎯 Сегодняшний фокус — одно дело.`);
+    if (S.hero.done) coachSay('Дело сделано ✓','<br>','Можешь добавить задачи или начать новую фокус-сессию.');
+    else if (S.hero.title) coachSay('Фокус сегодня: <strong>'+esc(S.hero.title)+'</strong>.','<br>','Одно дело — одно направление.');
+    else coachSay('Какое <strong>одно дело</strong> сделает сегодняшний день успешным?');
   }
 }
 
+// ——— TOAST ———
 function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('s');
-  setTimeout(() => el.classList.remove('s'), 2200);
+  const e=document.getElementById('toast');
+  e.textContent=msg; e.classList.add('s');
+  setTimeout(()=>e.classList.remove('s'),2000);
 }
 
-function confetti() {
-  const emojis = ['🎉','🔥','✨','💪','🧠','💥','⭐','🚀'];
-  for (let i = 0; i < 12; i++) {
-    const p = document.createElement('div');
-    p.className = 'confetti-piece';
-    p.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-    p.style.left = Math.random()*90 + '%';
-    p.style.top = -(Math.random()*40) + 'px';
-    p.style.animationDelay = Math.random()*0.3 + 's';
-    p.style.animationDuration = (0.7 + Math.random()*0.6) + 's';
-    document.body.appendChild(p);
-    setTimeout(() => p.remove(), 1500);
-  }
-}
-
-// ========== INIT ==========
+// ——— INIT ———
 render();
-if (!state.oneThing.title) {
-  document.getElementById('coachMsg').innerHTML =
-    '<strong>Kai:</strong> "Привет! 👋<br>Напиши своё <strong>одно дело</strong> на сегодня."';
-}
 </script>
 </body>
 </html>
