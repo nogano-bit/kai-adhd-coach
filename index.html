@@ -45,6 +45,35 @@
     padding-bottom: calc(72px + var(--safe-bottom));
   }
 
+  /* REMINDER BAR */
+  .rmd {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 80;
+    background: var(--accent); color: #fff;
+    padding: 10px 16px; font-size: 14px; font-weight: 500;
+    display: none; align-items: center; gap: 10px;
+    transform: translateY(-100%); transition: transform .35s cubic-bezier(.22,1,.36,1);
+    box-shadow: 0 2px 12px rgba(0,0,0,.15);
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .rmd.on { display: flex; transform: translateY(0) }
+  .rmd .rmd-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,.8); flex-shrink: 0;
+    animation: rmdPulse 2s ease-in-out infinite;
+  }
+  @keyframes rmdPulse {
+    0%, 100% { opacity: .5; transform: scale(1) }
+    50% { opacity: 1; transform: scale(1.4) }
+  }
+  .rmd .rmd-txt { flex: 1; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+  .rmd .rmd-done {
+    background: rgba(255,255,255,.2); border: none; color: #fff;
+    border-radius: 8px; padding: 5px 12px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: var(--font); white-space: nowrap;
+  }
+  .rmd .rmd-done:active { background: rgba(255,255,255,.35) }
+  body.has-rmd { padding-top: 44px }
+
   /* HEADER */
   .top {
     padding: 48px 20px 24px;
@@ -291,6 +320,13 @@
 </head>
 <body>
 
+<!-- REMINDER BAR -->
+<div class="rmd" id="rmdBar" onclick="doHero()">
+  <div class="rmd-dot"></div>
+  <div class="rmd-txt" id="rmdTxt"></div>
+  <button class="rmd-done" onclick="event.stopPropagation();doHero()">Сделать</button>
+</div>
+
 <!-- HEADER -->
 <div class="top">
   <div class="streak-pill" id="streakPill" style="display:none">🔥&nbsp;<span class="n" id="streakNum">0</span></div>
@@ -431,11 +467,23 @@ function save() { LS.set('state',S) }
 
 // ——— RENDER ———
 function render() {
+  // Reminder bar
+  const rmd = document.getElementById('rmdBar');
+  const h = S.hero;
+  if (h.title && !h.done) {
+    rmd.classList.add('on');
+    document.getElementById('rmdTxt').textContent = '🎯 ' + h.title;
+    document.body.classList.add('has-rmd');
+  } else {
+    rmd.classList.remove('on');
+    document.body.classList.remove('has-rmd');
+  }
+
   const sp = document.getElementById('streakPill');
   sp.style.display = S.streak>0?'inline-flex':'none';
   document.getElementById('streakNum').textContent = S.streak;
 
-  const h = S.hero;
+  // h already declared above for reminder
   document.getElementById('heroIcon').textContent = h.emoji;
   document.getElementById('heroTitle').textContent = h.title||'Пока пусто';
   document.getElementById('heroTitle').classList.toggle('done',h.done);
