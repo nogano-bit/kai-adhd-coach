@@ -257,6 +257,25 @@
     animation: pulse .6s ease-out;
   }
 
+  /* CHAT VIEW */
+  .chat-view { display:none; flex-direction:column; height:calc(100vh - 72px - var(--safe-bottom)); position:fixed; inset:0; z-index:60; background:var(--bg); padding-bottom:72px; }
+  .chat-view.on { display:flex }
+  .chat-msgs { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:8px; -webkit-overflow-scrolling:touch; }
+  .chat-msg { max-width:85%; padding:10px 14px; border-radius:16px; font-size:14px; line-height:1.45; animation:msgIn .25s ease; }
+  @keyframes msgIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
+  .chat-msg.kai { align-self:flex-start; background:var(--accent-soft); color:var(--text); border-bottom-left-radius:4px; }
+  .chat-msg.me { align-self:flex-end; background:var(--accent); color:#fff; border-bottom-right-radius:4px; }
+  .chat-time { font-size:10px; opacity:.5; margin-top:3px; text-align:right; }
+  .chat-bar { position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border); display:flex; align-items:center; gap:8px; padding:8px 12px var(--safe-bottom); z-index:70; }
+  .chat-inp { flex:1; border:1px solid var(--border); border-radius:20px; padding:10px 16px; font-size:15px; font-family:var(--font); outline:none; background:var(--bg); color:var(--text); -webkit-appearance:none; }
+  .chat-inp:focus { border-color:var(--accent) }
+  .chat-send { width:38px; height:38px; border-radius:50%; border:none; background:var(--accent); color:#fff; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .chat-send:active { opacity:.8 }
+  .chat-quick { display:flex; gap:6px; padding:0 12px 8px; overflow-x:auto; flex-wrap:nowrap; }
+  .chat-quick span { font-size:12px; background:var(--accent-soft); color:var(--accent); border-radius:16px; padding:7px 14px; white-space:nowrap; cursor:pointer; font-weight:500; }
+  .chat-quick span:active { opacity:.7 }
+  .chat-back { background:none; border:none; font-size:20px; cursor:pointer; padding:4px 8px; color:var(--text2); }
+
   /* BREATHING DOT */
   .breath-dot {
     display: inline-block; width: 6px; height: 6px;
@@ -330,8 +349,30 @@
   </div>
 </div>
 
+<!-- CHAT -->
+<div class="chat-view" id="chatView">
+  <div style="padding:8px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);background:var(--card)">
+    <button class="chat-back" onclick="closeChat()">←</button>
+    <div>
+      <div style="font-weight:600;font-size:15px">Kai</div>
+      <div style="font-size:12px;color:var(--text2)">ADHD-коуч</div>
+    </div>
+  </div>
+  <div class="chat-msgs" id="chatMsgs"></div>
+  <div class="chat-quick" id="chatQuick">
+    <span onclick="chatQuick('Я застрял')">🧩 Я застрял</span>
+    <span onclick="chatQuick('Какое дело?')">🎯 Какое дело?</span>
+    <span onclick="chatQuick('Фокус 25 мин')">⏱️ Фокус</span>
+    <span onclick="chatQuick('Я сделал!')">✅ Я сделал!</span>
+  </div>
+  <div class="chat-bar">
+    <input class="chat-inp" id="chatInp" placeholder="Напиши Kai..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="chat-send" onclick="sendChat()">↑</button>
+  </div>
+</div>
+
 <!-- BOTTOM -->
-<div class="bottom">
+<div class="bottom" id="bottomBar">
   <div class="tab sel" id="tToday" onclick="selTab('today')">
     <span class="tab-icon">📋</span><span>Сегодня</span>
   </div>
@@ -340,6 +381,9 @@
   </div>
   <div class="tab" id="tWins" onclick="selTab('wins')">
     <span class="tab-icon">📊</span><span>Прогресс</span>
+  </div>
+  <div class="tab" id="tChat" onclick="selTab('chat')">
+    <span class="tab-icon">💬</span><span>Kai</span>
   </div>
   <div class="tab" id="tAdd" onclick="openM('add')">
     <span class="tab-icon">+</span><span>Добавить</span>
@@ -375,7 +419,7 @@ const LS = {
   set(k,v) { try { localStorage.setItem('kai_'+k,JSON.stringify(v)) } catch {} }
 };
 const T = new Date().toISOString().split('T')[0];
-let S = LS.get('state', { date:T, hero:{title:'',emoji:'🎯',time:'',done:false}, tasks:[], streak:0, total:0, lastDate:null });
+let S = LS.get('state', { date:T, hero:{title:'',emoji:'🎯',time:'',done:false}, tasks:[], streak:0, total:0, lastDate:null, chatMsgs:[] });
 if (S.date!==T) {
   const yesterday = S.lastDate===S.date;
   S.date=T; S.hero={title:'',emoji:'🎯',time:'',done:false};
@@ -515,7 +559,11 @@ function submitM() {
 
 // ——— TABS ———
 function selTab(t) {
-  ['tToday','tWeek','tWins','tAdd'].forEach(id=>document.getElementById(id).classList.toggle('sel',id==='t'+t.charAt(0).toUpperCase()+t.slice(1)));
+  ['tToday','tWeek','tWins','tChat','tAdd'].forEach(id=>document.getElementById(id).classList.toggle('sel',id==='t'+t.charAt(0).toUpperCase()+t.slice(1)));
+  if (t==='chat') {
+    openChat();
+    return;
+  }
   if (t==='week') {
     const a=S.tasks.filter(x=>!x.done);
     coachSay('<strong>В работе:</strong>','<br>',a.length?a.map((x,i)=>`${i+1}. ${x.title}`).join('<br>'):'Пока пусто.');
@@ -526,6 +574,79 @@ function selTab(t) {
     else if (S.hero.title) coachSay('Фокус сегодня: <strong>'+esc(S.hero.title)+'</strong>.','<br>','Одно дело — одно направление.');
     else coachSay('Какое <strong>одно дело</strong> сделает сегодняшний день успешным?');
   }
+}
+
+// ——— CHAT ———
+function openChat() {
+  document.getElementById('chatView').classList.add('on');
+  document.getElementById('bottomBar').style.display='none';
+  renderChat();
+  setTimeout(()=>document.getElementById('chatInp').focus(),200);
+}
+function closeChat() {
+  document.getElementById('chatView').classList.remove('on');
+  document.getElementById('bottomBar').style.display='flex';
+}
+function renderChat() {
+  const el = document.getElementById('chatMsgs');
+  if (!S.chatMsgs.length) {
+    el.innerHTML = `<div class="chat-msg kai">Привет! Я Kai. Расскажи, что происходит — или нажми на быстрый ответ ниже.</div>`;
+    return;
+  }
+  const now = new Date();
+  el.innerHTML = S.chatMsgs.map(m => {
+    const cls = m.from==='kai'?'kai':'me';
+    const time = new Date(m.ts).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="chat-msg ${cls}">${esc(m.text)}<div class="chat-time">${time}</div></div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+function addChatMsg(from, text) {
+  S.chatMsgs.push({from, text, ts:Date.now()});
+  if (S.chatMsgs.length > 100) S.chatMsgs = S.chatMsgs.slice(-80);
+  save();
+  renderChat();
+  // Notify Telegram
+  if (window.Telegram?.WebApp && from==='me') {
+    Telegram.WebApp.sendData(JSON.stringify({action:'chat', message:text}));
+  }
+}
+function sendChat() {
+  const inp = document.getElementById('chatInp');
+  const v = inp.value.trim();
+  if (!v) return;
+  addChatMsg('me', v);
+  inp.value = '';
+  // Kai responds
+  setTimeout(()=>kaiRespond(v), 400);
+}
+function chatQuick(text) {
+  addChatMsg('me', text);
+  setTimeout(()=>kaiRespond(text), 400);
+}
+function kaiRespond(msg) {
+  const t = msg.toLowerCase();
+  let reply;
+  if (t.includes('застрял')||t.includes('не могу')) {
+    reply = 'Понял. Давай разберём по шагам.\n\n<b>Микро-шаг 1:</b> просто открой то, с чем ты застрял. Не делай — просто открой. Напиши «готово».';
+  } else if (t.includes('дело')||t.includes('сегодня')) {
+    reply = S.hero.title
+      ? `Твоё дело на сегодня: <b>${S.hero.title}</b>. Сфокусируйся на нём.`
+      : 'Какое <b>одно дело</b> сделает сегодняшний день успешным? Только одно — напиши.';
+  } else if (t.includes('фокус')) {
+    reply = 'Включаю фокус-сессию: <b>25 минут</b>. Я рядом. Напиши, над чем работаешь.';
+  } else if (t.includes('сделал')||t.includes('готово')||t.includes('done')) {
+    reply = S.hero.done
+      ? 'Ты уже сделал главное дело сегодня. Отлично! Можешь добавить задачи или отдохнуть.'
+      : 'Нажми <b>«Сделать»</b> на карточке вверху — и я засчитаю победу. Или скажи, что именно сделал.';
+  } else if (t.includes('привет')||t.includes('hi')) {
+    reply = 'Привет! ☀️\n\nЯ Kai — твой ADHD-коуч. Спроси меня:\n• Какое дело на сегодня?\n• Помоги разобрать завал\n• Нужна фокус-сессия';
+  } else if (t.length < 5) {
+    reply = 'Расскажи подробнее — я слушаю. Что на душе?';
+  } else {
+    reply = `Понял. «${msg}».\n\nЭто то, над чем ты хочешь работать сейчас? Или это мысль, которую лучше сохранить в парковку?`;
+  }
+  addChatMsg('kai', reply);
 }
 
 // ——— TOAST ———
