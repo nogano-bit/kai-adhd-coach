@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kai — ADHD Coach</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--tg-theme-bg-color, #f8f9fa);
+      color: var(--tg-theme-text-color, #1a1a2e);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    .header {
+      background: linear-gradient(135deg, #6c63ff 0%, #b8a9ff 100%);
+      padding: 48px 24px 32px;
+      color: white;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .header .sub {
+      font-size: 14px;
+      opacity: 0.85;
+      margin-top: 4px;
+    }
+    .one-thing-card {
+      margin: -24px 16px 0;
+      background: var(--tg-theme-section-bg-color, #fff);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(108, 99, 255, 0.12);
+      position: relative;
+      z-index: 10;
+    }
+    .one-thing-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #6c63ff;
+      margin-bottom: 8px;
+    }
+    .one-thing-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .one-thing-emoji {
+      font-size: 32px;
+      width: 48px; height: 48px;
+      background: #f0eeff;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .one-thing-text {
+      flex: 1;
+    }
+    .one-thing-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .one-thing-time {
+      font-size: 13px;
+      color: #999;
+      margin-top: 2px;
+    }
+    .btn-glow {
+      background: #6c63ff;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+    }
+    .btn-glow:active { transform: scale(0.95); }
+    .btn-glow.done {
+      background: #00c48c;
+      box-shadow: 0 4px 12px rgba(0, 196, 140, 0.3);
+    }
+
+    .section-label {
+      padding: 24px 20px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6c63ff;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+    }
+
+    .action-list {
+      margin: 0 16px;
+    }
+    .action-item {
+      background: var(--tg-theme-section-bg-color, #fff);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .action-item:active { transform: scale(0.97); }
+    .action-icon { font-size: 24px; width: 32px; text-align: center; }
+    .action-text { flex: 1; font-size: 15px; font-weight: 500; }
+    .action-arrow { color: #ccc; font-size: 18px; }
+
+    .coach-bubble {
+      margin: 12px 16px;
+      background: #f0eeff;
+      border-radius: 18px 18px 18px 4px;
+      padding: 16px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .coach-avatar {
+      width: 36px; height: 36px;
+      background: #6c63ff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .coach-msg {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #2d2d44;
+    }
+    .coach-msg strong { color: #6c63ff; }
+
+    .bottom-tab {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 70px;
+      background: var(--tg-theme-section-bg-color, #fff);
+      border-top: 1px solid #eee;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: 8px;
+    }
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-size: 10px;
+      color: #bbb;
+      cursor: pointer;
+      padding: 4px 12px;
+    }
+    .tab-item.active { color: #6c63ff; }
+    .tab-icon { font-size: 22px; }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 200;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-sheet {
+      background: var(--tg-theme-section-bg-color, #fff);
+      border-radius: 24px 24px 0 0;
+      width: 100%;
+      max-width: 393px;
+      padding: 24px 20px 40px;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .modal-handle {
+      width: 36px; height: 4px;
+      background: #ddd;
+      border-radius: 2px;
+      margin: 0 auto 16px;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .modal-input {
+      width: 100%;
+      border: 2px solid #e8e8f0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 16px;
+      font-family: inherit;
+      outline: none;
+      margin-bottom: 12px;
+    }
+    .modal-input:focus { border-color: #6c63ff; }
+    .modal-btn {
+      width: 100%;
+      background: #6c63ff;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .task-item {
+      background: var(--tg-theme-section-bg-color, #fff);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 16px 6px;
+      cursor: pointer;
+    }
+    .task-check {
+      width: 22px; height: 22px;
+      border: 2px solid #d0d0e0;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .task-check.done { background: #6c63ff; border-color: #6c63ff; }
+    .task-check.done::after { content: '✓'; color: white; font-size: 13px; font-weight: 700; }
+    .task-text { flex: 1; font-size: 15px; }
+    .task-text.done { text-decoration: line-through; color: #bbb; }
+    .task-time { font-size: 11px; color: #bbb; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Привет, Костя ☀️</h1>
+    <div class="sub">Твой ADHD-коуч. Одно дело за раз.</div>
+  </div>
+
+  <!-- ONE THING CARD -->
+  <div class="one-thing-card">
+    <div class="one-thing-label">🎯 Одно дело на сегодня</div>
+    <div class="one-thing-row">
+      <div class="one-thing-emoji">🍠</div>
+      <div class="one-thing-text">
+        <div class="one-thing-title" id="oneTitle">Нарезать батат</div>
+        <div class="one-thing-time"><span id="oneProject">Дегидратор</span> · ~5 мин</div>
+      </div>
+      <button class="btn-glow" id="oneBtn" onclick="completeOne()">🔥 Сделать</button>
+    </div>
+  </div>
+
+  <!-- COACH BUBBLE -->
+  <div class="coach-bubble" id="coachBubble">
+    <div class="coach-avatar">🧘</div>
+    <div class="coach-msg" id="coachMsg">
+      <strong>Kai:</strong> "Твоё одно дело — нарезать батат для дегидратора."<br>
+      Это займёт ~5 минут. Это <em>единственное</em>, что нужно сделать.<br>
+      <span style="font-size:12px;opacity:0.6;display:block;margin-top:4px;">👆 Нажми «Сделать», когда готово</span>
+    </div>
+  </div>
+
+  <!-- TODAY'S TASKS -->
+  <div class="section-label">📋 Сегодня</div>
+
+  <div class="task-item" onclick="toggleTask(this)">
+    <div class="task-check"></div>
+    <span class="task-text">Нарезать батат 🍠</span>
+    <span class="task-time">~5 мин</span>
+  </div>
+  <div class="task-item" onclick="toggleTask(this)">
+    <div class="task-check"></div>
+    <span class="task-text">Дверь в козлятнике 🐐</span>
+    <span class="task-time">~2ч</span>
+  </div>
+  <div class="task-item" onclick="toggleTask(this)">
+    <div class="task-check"></div>
+    <span class="task-text">Полить грядки 🌱</span>
+    <span class="task-time">~10 мин</span>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="section-label">⚡ Быстрые действия</div>
+  <div class="action-list">
+    <div class="action-item" onclick="openModal('bodyDouble')">
+      <div class="action-icon">🧑‍🤝‍🧑</div>
+      <div class="action-text">Body Double (25 мин)</div>
+      <div class="action-arrow">→</div>
+    </div>
+    <div class="action-item" onclick="openModal('stuck')">
+      <div class="action-icon">🆘</div>
+      <div class="action-text">Я застрял / overwhelmed</div>
+      <div class="action-arrow">→</div>
+    </div>
+    <div class="action-item" onclick="openModal('park')">
+      <div class="action-icon">🅿️</div>
+      <div class="action-text">Parking Lot (сохранить идею)</div>
+      <div class="action-arrow">→</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM TABS -->
+  <div class="bottom-tab">
+    <div class="tab-item active">
+      <span class="tab-icon">🎯</span>
+      <span>Сегодня</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('week')">
+      <span class="tab-icon">📅</span>
+      <span>Неделя</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('wins')">
+      <span class="tab-icon">🏆</span>
+      <span>Победы</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('chat')">
+      <span class="tab-icon">💬</span>
+      <span>Чат с Kai</span>
+    </div>
+  </div>
+
+  <!-- BOTTOM SHEET MODAL -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="modalTitle">Создать задачу</div>
+      <input class="modal-input" id="modalInput" placeholder="Напиши..." autofocus>
+      <button class="modal-btn" id="modalBtn" onclick="submitModal()">Готово</button>
+    </div>
+  </div>
+
+<script>
+  if (window.Telegram && Telegram.WebApp) {
+    Telegram.WebApp.ready();
+    Telegram.WebApp.expand();
+  }
+
+  let oneDone = false;
+  let modalMode = 'task';
+
+  function completeOne() {
+    const btn = document.getElementById('oneBtn');
+    if (oneDone) return;
+    oneDone = true;
+    btn.textContent = '✅ Готово! +25 XP';
+    btn.className = 'btn-glow done';
+    document.getElementById('coachMsg').innerHTML =
+      '<strong>Kai:</strong> 🔥 <strong>ГОТОВО!</strong> Ты сделал это!<br><span style="font-size:13px;">Дофамин получен. 🧠💥</span>';
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.sendData(JSON.stringify({action: 'done', task: 'Нарезать батат'}));
+    }
+  }
+
+  function toggleTask(el) {
+    const check = el.querySelector('.task-check');
+    const text = el.querySelector('.task-text');
+    check.classList.toggle('done');
+    text.classList.toggle('done');
+  }
+
+  function openModal(mode) {
+    modalMode = mode;
+    const overlay = document.getElementById('modalOverlay');
+    overlay.classList.add('show');
+    document.getElementById('modalInput').value = '';
+
+    if (mode === 'bodyDouble') {
+      document.getElementById('modalTitle').textContent = '🧑‍🤝‍🧑 Body Double';
+      document.getElementById('modalInput').placeholder = 'Что будешь делать 25 мин?';
+      document.getElementById('modalBtn').textContent = 'Начать! 🧘';
+    } else if (mode === 'stuck') {
+      document.getElementById('modalTitle').textContent = '🆘 Что не так?';
+      document.getElementById('modalInput').placeholder = 'Напиши одним словом, что висит...';
+      document.getElementById('modalBtn').textContent = 'Разобрать 🧩';
+    } else if (mode === 'park') {
+      document.getElementById('modalTitle').textContent = '🅿️ Паркую мысль';
+      document.getElementById('modalInput').placeholder = 'Идея / задача / мысль...';
+      document.getElementById('modalBtn').textContent = 'Сохранить 💾';
+    } else {
+      document.getElementById('modalTitle').textContent = '✨ Новая задача';
+      document.getElementById('modalInput').placeholder = 'Что хочешь сделать?';
+      document.getElementById('modalBtn').textContent = 'Добавить +';
+    }
+  }
+
+  function closeModal(e) {
+    if (e && e.target !== e.currentTarget) return;
+    document.getElementById('modalOverlay').classList.remove('show');
+  }
+
+  function submitModal() {
+    const input = document.getElementById('modalInput');
+    const val = input.value.trim();
+    if (!val) return;
+
+    const coach = document.getElementById('coachMsg');
+    const overlay = document.getElementById('modalOverlay');
+
+    if (modalMode === 'bodyDouble') {
+      coach.innerHTML = `<strong>Kai:</strong> "Я рядом. Ты работаешь над: <strong>${val}</strong>. 25 минут. Погнали. 🧘"`;
+    } else if (modalMode === 'stuck') {
+      coach.innerHTML = `<strong>Kai:</strong> "Окей, «${val}». Давай разберём. 🧩<br>Первый микро-шаг: открой ноутбук. Просто открой. Скажи «готово», когда сделаешь."`;
+    } else if (modalMode === 'park') {
+      coach.innerHTML = `<strong>Kai:</strong> "💡 Записал: <strong>${val}</strong> 🅿️<br>Вернёмся после текущего дела. А пока — фокус на том, что сейчас."`;
+    } else {
+      const task = document.createElement('div');
+      task.className = 'task-item';
+      task.onclick = function() { toggleTask(this); };
+      task.innerHTML = `<div class="task-check"></div><span class="task-text">${val}</span><span class="task-time">прямо сейчас</span>`;
+      document.querySelector('.section-label').after(task);
+      coach.innerHTML = `<strong>Kai:</strong> "${val}" — записал. ✅ Это в списке на сегодня.`;
+    }
+
+    overlay.classList.remove('show');
+  }
+
+  function switchTab(tab) {
+    const coach = document.getElementById('coachMsg');
+    if (tab === 'week') {
+      coach.innerHTML = '<strong>Kai:</strong> 📅 На этой неделе:<br>1. Нарезать батат 🍠<br>2. Дверь в козлятнике 🐐<br>3. Грядки 🌱<br>4. Wow Treats упаковка 📦';
+    } else if (tab === 'wins') {
+      coach.innerHTML = '<strong>Kai:</strong> 🏆 Твои победы:<br>🔥 3 дня подряд с одним делом<br>✅ Всего сделано: 12 задач<br>⭐ Лучший день: среда (5/5 задач!)';
+    } else if (tab === 'chat') {
+      coach.innerHTML = '<strong>Kai:</strong> Просто напиши мне внизу 👇<br>Я здесь, чтобы помочь. Что случилось?';
+    } else {
+      coach.innerHTML = '<strong>Kai:</strong> 🎯 Сегодняшний фокус: одно дело.';
+    }
+  }
+</script>
+</body>
+</html>
